@@ -1,0 +1,65 @@
+<html>
+<head><title>Question 1</title></head>
+<script src="numbers.js"></script>
+<script>
+var totalComparisons = 0;
+var test = [3, 8, 2, 5, 4, 7, 6, 1];
+var test10 = [3, 9, 8, 4, 6, 10, 2, 5, 7, 1];
+var test100 = [57, 97, 17, 31, 54, 98, 87, 27, 89, 81, 18, 70, 3, 34, 63, 100, 46, 30, 99, 10, 33, 65, 96, 38, 48, 80, 95, 6, 16, 19, 56, 61, 1, 47, 12, 73, 49, 41, 37, 40, 59, 67, 93, 26, 75, 44, 58, 66, 8, 55, 94, 74, 83, 7, 15, 86, 42, 50, 5, 22, 90, 13, 69, 53, 43, 24, 92, 51, 23, 39, 78, 85, 4, 25, 52, 36, 60, 68, 9, 64, 79, 14, 45, 2, 77, 84, 11, 71, 35, 72, 28, 76, 82, 88, 32, 21, 20, 91, 62, 29];
+
+var arr = test10;
+quicksort();
+console.log(arr);
+
+
+function quicksort(l, r) {
+	l = l || 0;
+	r = r || arr.length - 1;
+
+	if (l >= r) {
+		return [];
+	}
+
+	var length = r - l + 1;
+
+	var p = partition(l, r);
+
+	totalComparisons += (p - 1) - l;
+	var less = quicksort(l, p - 1);
+
+	totalComparisons += r - (p + 1);
+	var more = quicksort(p + 1, r);
+	return less.concat(arr[p], more);
+}
+
+function dump(l,r,i,j) {
+	console.log('l', l, 'r', r, 'i', i, 'j', j, 'arr', arr);
+	console.log('totalComparisons', totalComparisons);
+}
+
+function partition(l, r) {
+	var pivot = arr[l];
+	// If pivot is not the first element, need to swap it with the first element.
+	var i = l + 1;
+	for (var j = i; j < r; j++) {
+		if (arr[j] < pivot) {
+			swap(i, j);
+			i++;
+		}
+	}
+	swap(l, i - 1);
+	dump(l, r, i, j);
+	return i - 1;
+}
+
+function swap(m, n) {
+	if (m == n) {
+		// throw new Error('swapping single element with index:', m);
+	}
+	var temp = arr[m];
+	arr[m] = arr[n]
+	arr[n] = temp;	
+}
+
+</script>
+</html>

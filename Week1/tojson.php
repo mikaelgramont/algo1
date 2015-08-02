@@ -6,13 +6,16 @@ class Utils
 		$arr = [];
 		$file = fopen($filename, "r");
 		while(!feof($file)){
-		    echo fgets($file).",\n";
+			$val = trim(fgets($file));
+			if ($val) {
+			    $arr[] = $val;
+			}
 		}
 		fclose($file);
+
+		return json_encode($arr);
 	}
 }
 
 $filename = $_GET['file'] ? $_GET['file'] : 'IntegerArray.txt';
-echo 'var numbers = [';
-Utils::getNumbers($filename);
-echo '];';
+echo Utils::getNumbers($filename);

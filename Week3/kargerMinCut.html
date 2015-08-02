@@ -1,0 +1,128 @@
+<html>
+<head><title>Week 3 - Question 1</title></head>
+<script src="kargerMinCut2.js"></script>
+<script>
+
+list = [
+	[],
+	[2, 3, 4, 7],
+	[1, 3, 4],
+	[1, 2, 4],
+	[1, 2, 3, 5],
+	[4, 6, 7, 8],
+	[5, 7, 8],
+	[1, 5, 6, 8],
+	[5, 6, 7]
+];
+
+
+console.table(list);
+var arr = list;
+// (function(wholeList) {
+
+	function mergeRandomEdge() {
+		var total = arr.length;
+		var uArray;
+		var attempt = 0;
+		var u;
+		while (!uArray || !uArray.length) {
+			u = Math.floor(total * Math.random());
+			uArray = arr[u];
+			attempt++;
+			if (attempt > arr.length) {
+				throw new Error("Bad random");
+			}
+		}
+		
+
+		total = uArray.length;
+		// u starts at index 0, so use floor():
+		var indexV = Math.floor(total * Math.random());
+		var v = uArray[indexV];
+
+		// u = 5;
+		// v = 8;
+
+		console.log("Picked", u, v);
+		console.table(arr);
+		mergeNodes(arr, u, v);
+	}
+
+	function mergeNodes(arr, u, v) {
+		// All vertices that pointed to v must now point to u: go through v's list, and for each entry there, go to those vertices's entries and replace v with u
+
+		// Remove V from U's entry.
+		var indexOfVInU = arr[u].indexOf(v);
+		if (indexOfVInU == -1) {
+			console.log("Bad index", u, v, arr);
+		}
+		arr[u].splice(indexOfVInU, 1);
+		console.log("Removed v in u");
+		console.table(arr);
+
+		// // Remove U from V's entry.
+		// var indexOfUInV = arr[v].indexOf(u);
+		// if (indexOfUInV == -1) {
+		// 	console.log("Bad index 2", u, v, arr);
+		// }
+		// arr[v].splice(indexOfUInV, 1);
+		// console.log("Removed u in v");
+		// console.table(arr);
+
+
+		// Replace V with U in all remaining entries.
+		arr[v].forEach(function(adjacentToV) {
+			var indexOfUInAdjacent = arr[adjacentToV].indexOf(u);
+			var indexOfVInAdjacent = arr[adjacentToV].indexOf(v);
+			if (indexOfUInAdjacent !== -1) {
+				// If u is already there (coincidence!), just remove v:
+				arr[adjacentToV].splice(indexOfVInAdjacent, 1);
+				console.log("Removed v in adjacent of v whose index was", adjacentToV);
+				console.table(arr);
+			} else {
+				// Else replace v with u
+				if (indexOfVInAdjacent == -1) {
+					console.log("Bad index 3", u, v, adjacentToV, arr);
+				}
+
+				arr[adjacentToV][indexOfVInAdjacent] = u;
+				console.log("Replaced v with u in adjacent of v whose index was", adjacentToV);
+				console.table(arr);
+			}
+
+		});
+
+		// Remove V from the top-level list.
+		arr[v] = [];
+		console.log("Cleared v");
+		console.table(arr);
+	}
+
+	function countNonMergedNodes() {
+		count = 0;
+		arr.forEach(function(val) {
+			if (val.length > 0) {
+				count++;
+			}
+		});
+		return count;
+	}
+
+	var safety = 500;
+	var remaining;
+	while ((remaining = countNonMergedNodes()) > 2) {
+		console.log("Remaining", remaining);
+		mergeRandomEdge();
+
+
+		safety--;
+		if (safety == 0) {
+			throw new Error("Bad loop");
+		}
+	}
+	console.log("Finished. Remaining", remaining);
+	debugger;
+
+// })(list);
+</script>
+</html>
