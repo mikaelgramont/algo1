@@ -22,7 +22,7 @@ def karger(G):
         for x in G[v2]:
             # All references to v2 must be removed and replaced with v1.
             G[x].remove(v2)
-            # This is key: we will have duplicate entries in a sublist,
+            # This is key: we will have duplicate entries for v1 in a sublist,
             # they represent the number of parallel edges, which will
             # eventually represent the number of min cuts.
             G[x].append(v1) 
