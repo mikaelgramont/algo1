@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BFS tests</title>
+<style>
+ul, li {
+	margin: 0;
+	padding: 0;	
+}
+ul {
+	list-style: none;
+}
+.container {
+	width: 400px;
+	height: 400px;
+}
+.list {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.cell {
+	position: absolute;
+}
+</style>
+</head>
+<body>
+	<div class="container">
+	</div>
+
+	<script>
+		var xDiv = 4,
+			yDiv = 4;
+
+		var cont = document.getElementsByClassName('container')[0];
+		var frag = document.createDocumentFragment();
+		var list = document.createElement('ul');
+		var cells = [];
+		list.classList.add('list');
+		for (var i = 0; i < xDiv; i++) {
+			for (var j = 0; j < yDiv; j++) {
+				var cell = document.createElement('li');
+				cell.classList.add('cell');
+				cell.style.width = 100 / xDiv + '%';
+				cell.style.top = i * 100 / xDiv + '%';
+				cell.style.height = 100 / yDiv + '%';
+				cell.style.left = j * 100 / xDiv + '%';
+
+				var hue = Math.round(Math.random() * 255);
+				cell.dataset.hue = hue;
+				cell.style.background = 'hsl(' + hue + ', 100%, 90%)';
+				list.appendChild(cell);
+
+				cells.push(cell);
+			}
+		}
+		frag.appendChild(list);
+		cont.appendChild(frag);
+
+		var graph = [
+			[4],
+			[2, 5],
+			[1, 6],
+			[7],
+
+			[0, 8],
+			[1, 9],
+			[2, 10],
+			[3, 11],
+
+			[4, 9, 12],
+			[5, 8, 13],
+			[6, 11, 14],
+			[7, 10, 15],
+
+			[8, 13],
+			[9, 12],
+			[10, 15],
+			[11, 14]
+		];
+
+		var l = graph.length;
+		var explored = [];
+		for (var i = 0; i < l; i++) {
+			explored[i] = 0;
+		}
+
+		function bfs(g, startId, fn, cells) {
+			markCellVisited(startId);
+			var q = new Queue();
+			q.push(startId); // s
+
+			var currentId; // v
+			while((currentId = q.pop()) !== undefined) {
+				var nbConnectedNodes = g[currentId].length;
+				for (var i = 0; i < nbConnectedNodes; i++) {
+					var connectedNodeId = g[currentId][i];
+					if (!explored[connectedNodeId]) {
+						fn(connectedNodeId);
+						q.push(connectedNodeId);
+					}
+				}
+			}
+		}
+
+		function markCellVisited(id) {
+			explored[id] = 1;
+			var cell = cells[id];
+			var hue = cell.dataset.hue;
+			cell.style.background = 'hsl(' + hue + ', 100%, 30%)';			
+		}
+
+		var Queue = function() {
+			this.arr = [];
+		};
+		Queue.prototype.push = function(node) {
+			this.arr.push(node);
+		}
+		Queue.prototype.pop = function() {
+			return this.arr.shift();
+		}
+
+	</script>
+</body>
+</html>
