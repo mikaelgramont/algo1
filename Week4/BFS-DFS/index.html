@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>BFS tests</title>
+<title>BFS/DFS tests</title>
 <style>
 body {
 	font-family: Helvetica;
@@ -27,6 +27,10 @@ ul {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	background: #333;
+}
+.cell:nth-child(2n+1) {
+	background: #eee;
 }
 .num {
 	display: inline-block;
@@ -44,9 +48,9 @@ ul {
 </style>
 </head>
 <body>
-	<div class="container">
-	</div>
-
+	<div class="container"></div>
+	<button id="bfs-btn">BFS</button>
+	<button id="dfs-btn">DFS</button>
 	<script>
 		var xDiv = 5,
 			yDiv = 5;
@@ -72,9 +76,6 @@ ul {
 				cell.appendChild(num);
 				nums.push(num);
 
-				var hue = Math.round(Math.random() * 255);
-				cell.dataset.hue = hue;
-				cell.style.background = 'hsl(' + hue + ', 100%, 90%)';
 				list.appendChild(cell);
 
 				cells.push(cell);
@@ -115,12 +116,16 @@ ul {
 			[19]
 		];
 
-		var l = graph.length;
 		var explored = [];
-		for (var i = 0; i < l; i++) {
-			explored[i] = 0;
+		var exploredCount;
+
+		function init() {
+			var l = graph.length;
+			for (var i = 0; i < l; i++) {
+				explored[i] = 0;
+			}
+			exploredCount = 0;
 		}
-		var exploredCount = 0;
 
 		function bfs(g, startId, fn, cells) {
 			markCellVisited(startId);
@@ -145,12 +150,23 @@ ul {
 			markCellLast(lastId);
 		}
 
+		function dfs(g, startId, fn, cells) {
+			markCellVisited(startId);
+			var nbConnectedNodes = g[startId].length;
+			for (var i = 0; i < nbConnectedNodes; i++) {
+				var connectedNodeId = g[startId][i];
+				if (!explored[connectedNodeId]) {
+					dfs(g, connectedNodeId, fn, cells)
+				}
+			}
+		}
+
 		function markCellVisited(id) {
 			explored[id] = 1;
 			var cell = cells[id];
-			var hue = cell.dataset.hue;
-			cell.style.background = 'hsl(' + hue + ', 100%, 30%)';
 			nums[id].innerText = exploredCount++;
+			var hue = Math.round(255 * exploredCount / (xDiv * yDiv));
+			cell.style.background = 'hsl(' + hue + ', 100%, 30%)';
 		}
 
 		function markCellFirst(id) {
@@ -181,12 +197,21 @@ ul {
 			return this.arr.shift();
 		}
 
-		// Get this party started.
-		var topLevelNodeId;
-		while ((topLevelNodeId = pickUnexploredNode(graph)) !== null) {
-			bfs(graph, topLevelNodeId, markCellVisited, cells);	
-		}
-		
+		document.getElementById('bfs-btn').addEventListener('click', function doBfs() {
+			init();
+			var topLevelNodeId;
+			while ((topLevelNodeId = pickUnexploredNode(graph)) !== null) {
+				bfs(graph, topLevelNodeId, markCellVisited, cells);	
+			}
+		});
+
+		document.getElementById('dfs-btn').addEventListener('click', function doDfs() {
+			init();
+			var topLevelNodeId;
+			while ((topLevelNodeId = pickUnexploredNode(graph)) !== null) {
+				dfs(graph, topLevelNodeId, markCellVisited, cells);	
+			}
+		});
 	</script>
 </body>
 </html>
