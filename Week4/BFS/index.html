@@ -21,6 +21,16 @@ ul {
 }
 .cell {
 	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.num {
+	display: inline-block;
+	border-radius: 20px;
+	padding: 10px;
+	background: rgba(255, 255, 255, .5);
+	color: #333;
 }
 </style>
 </head>
@@ -36,6 +46,8 @@ ul {
 		var frag = document.createDocumentFragment();
 		var list = document.createElement('ul');
 		var cells = [];
+		var nums = [];
+
 		list.classList.add('list');
 		for (var i = 0; i < xDiv; i++) {
 			for (var j = 0; j < yDiv; j++) {
@@ -45,6 +57,11 @@ ul {
 				cell.style.top = i * 100 / xDiv + '%';
 				cell.style.height = 100 / yDiv + '%';
 				cell.style.left = j * 100 / xDiv + '%';
+
+				var num = document.createElement('p');
+				num.classList.add('num');
+				cell.appendChild(num);
+				nums.push(num);
 
 				var hue = Math.round(Math.random() * 255);
 				cell.dataset.hue = hue;
@@ -84,6 +101,7 @@ ul {
 		for (var i = 0; i < l; i++) {
 			explored[i] = 0;
 		}
+		var exploredCount = 0;
 
 		function bfs(g, startId, fn, cells) {
 			markCellVisited(startId);
@@ -91,7 +109,16 @@ ul {
 			q.push(startId); // s
 
 			var currentId; // v
-			while((currentId = q.pop()) !== undefined) {
+			processNext();
+
+			function processNext() {
+				currentId = q.pop();
+				if (currentId === undefined) {
+					return;
+				}
+				
+				setTimeout(processNext, 1000);
+
 				var nbConnectedNodes = g[currentId].length;
 				for (var i = 0; i < nbConnectedNodes; i++) {
 					var connectedNodeId = g[currentId][i];
@@ -107,7 +134,8 @@ ul {
 			explored[id] = 1;
 			var cell = cells[id];
 			var hue = cell.dataset.hue;
-			cell.style.background = 'hsl(' + hue + ', 100%, 30%)';			
+			cell.style.background = 'hsl(' + hue + ', 100%, 30%)';
+			nums[id].innerText = exploredCount++;
 		}
 
 		var Queue = function() {
@@ -120,6 +148,8 @@ ul {
 			return this.arr.shift();
 		}
 
+		// Get this party started.
+		bfs(graph, 0, markCellVisited, cells);
 	</script>
 </body>
 </html>
