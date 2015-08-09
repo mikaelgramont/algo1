@@ -9,8 +9,8 @@ class Utils
 			$row = trim(fgets($file));
 			$values = explode(" ", $row);
 
-			$tail = (int)$values[0];
-			$head = (int)$values[1];
+			$tail = (int)$values[0] - 1;
+			$head = (int)$values[1] - 1;
 
 			if (!array_key_exists($tail, $list)) {
 				$list[$tail] = [];

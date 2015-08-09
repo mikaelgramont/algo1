@@ -16,15 +16,35 @@ Stack.prototype.push = function(node) {
 Stack.prototype.pop = function() {
 	return this.arr.pop();
 }
+Stack.prototype.isEmpty = function() {
+	return this.arr.length == 0;
+}
 
-var explored = [];
-var f;
-function init(g) {
+var explored;
+function initExplored(g) {
+	explored = [];
 	var l = g.length;
 	for (var i = 0; i < l; i++) {
 		explored[i] = 0;
 	}
 }
+
+var f;
+function initFinishingTimes() {
+	f = [];	
+}
+
+var leaders;
+function initLeaders(g) {
+	leaders = [];
+	var l = g.length;
+	for (var i = 0; i < l; i++) {
+		leaders[i] = 0;
+	}
+}
+
+var source;
+
 
 function reverseGraph(g) {
 	var rev = [];
@@ -47,7 +67,7 @@ function reverseGraph(g) {
 
 function pickUnexploredNode(g) {
 	var l = explored.length;
-	for (var i = 0; i < l; i++) {
+	for (var i = l - 1 ; i >= 0; i--) {
 		if (!explored[i]) {
 			return i;
 		}
@@ -55,25 +75,81 @@ function pickUnexploredNode(g) {
 	return null;
 }
 
-function dfs(g, startId) {
+var dfsStep1Count = 0;
+function dfsLoopStep1(g, startId) {
+	markExplored(startId);
+	var nbConnectedNodes = g[startId].length;
+	for (var i = 0; i < nbConnectedNodes; i++) {
+		var w = g[startId][i];
+		if (!explored[w]) {
+			markExplored(w);
+			dfsLoopStep1(g, w);
+		}
+	}
+	f[startId] = dfsStep1Count++;
+
+	function markExplored(w) {
+		explored[w] = 1;
+	}
+}
+
+
+function dfsLoopStep1_(g, startId) {
 	var s = new Stack();
-	s.push(startId); // s
-	explored[startId] = 1;
+
+	push(startId);
+
+	while(!s.isEmpty()) {
+		var v = pop();
+
+		g[v].forEach(function(w) {
+			if (!explored[w]) {
+				markExplored(w);
+				push(w);
+			}
+		});
+
+		markExplored(v);
+		f[v] = dfsStep1Count;
+		console.log("f[" + v + "] = " + dfsStep1Count);
+		dfsStep1Count++;
+	}
+	
+	function markExplored(w) {
+		explored[w] = 1;
+	}
+
+	function push(v) {
+		s.push(v);
+		console.log(s.arr);
+	}
+	function pop() {
+		var v = s.pop();
+		console.log("Popped", v);
+		return v;
+	}
+}
+
+function dfsLoopStep2(g, startId) {
+	var s = new Stack();
+	s.push(startId);
+	markExplored(startId);
 
 	var v;
-	var count = 0;
 	while((v = s.pop()) !== undefined) {
 		for (var i = g[v].length - 1; i >= 0 ; i--) {
 			var w = g[v][i];
 			if (!explored[w]) {
-				explored[w] = 1;
-				// For step 1
-				f[w] = count;
+				markExplored(w);
 				s.push(w);
-
-				count++;
 			}
+			
 		}
+	}
+
+	function markExplored(w) {
+		explored[w] = 1;
+		leaders[w] = source;
 	}
 }
 
@@ -83,31 +159,39 @@ function doTheMagic(input) {
 	var grev = reverseGraph(g);
 	var topLevelNodeId;
 
-	init(g);
-	output = grev.join(" ");
-
-	// Initialize inishing times.
-	f = [];
+	initExplored(g);
+	initFinishingTimes();
 
 	// Run DFS on grev to compute finishing times.
-	while ((topLevelNodeId = pickUnexploredNode(grev)) !== null) {
-		dfs(grev, topLevelNodeId);	
+	while ((w = pickUnexploredNode(grev)) !== null) {
+		dfsLoopStep1(grev, w);	
 	}
 
-	console.log("Finishing times");
-	console.table(f);
+	console.log("Post step 1 - Finishing times", f);
+	return;
+	initExplored(g);
+	initLeaders(g);
 
-	// Reset the explored list to use on g.
-	explored = [];
-	
-	// Run DFS on g, from the highest finishing times down, plucking SCCs as we go,
+	// Run dfsLoopStep2 on g, from the highest finishing times down, plucking SCCs as we go,
 	// until they're all gone.
+	while ((topLevelNodeId = pickUnexploredNode(g)) !== null) {
+		source = topLevelNodeId;
+		dfsLoopStep2(g, topLevelNodeId);	
+	}
 
+	console.log("Post step 2 - leaders", leaders);
+
+	// Debug
+	output = grev.join(" ");
 	return output;
 }
 
 (function run() {
-	examples.forEach(function(example, i) {		
+	examples.forEach(function(example, i) {
+		if (i)	{
+			// Temp for debug
+			return;
+		}
 		var expected = example.output;
 		var found = doTheMagic(example.input);
 
