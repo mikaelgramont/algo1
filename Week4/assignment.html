@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Week 4 assignment</title>
+</head>
+<body>
+
+<script src="examples.js"></script>
+<script>
+var Stack = function() {
+	this.arr = [];
+};
+Stack.prototype.push = function(node) {
+	this.arr.push(node);
+}
+Stack.prototype.pop = function() {
+	return this.arr.pop();
+}
+
+var explored = [];
+var f;
+function init(g) {
+	var l = g.length;
+	for (var i = 0; i < l; i++) {
+		explored[i] = 0;
+	}
+}
+
+function reverseGraph(g) {
+	var rev = [];
+
+	for (var i = 0, l = g.length; i <l; i++) {
+		rev[i] = [];
+	};
+
+	for (var i = 0, l = g.length; i <l; i++) {
+		for (var j = 0, l2 = g[i].length; j <l2; j++) {
+			var current = g[i][j];
+			if (typeof rev[current] == 'undefined') {
+				rev[current] = [];
+			}
+			rev[current].push(i);
+		}
+	};
+	return rev;
+}
+
+function pickUnexploredNode(g) {
+	var l = explored.length;
+	for (var i = 0; i < l; i++) {
+		if (!explored[i]) {
+			return i;
+		}
+	}
+	return null;
+}
+
+function dfs(g, startId) {
+	var s = new Stack();
+	s.push(startId); // s
+	explored[startId] = 1;
+
+	var v;
+	var count = 0;
+	while((v = s.pop()) !== undefined) {
+		for (var i = g[v].length - 1; i >= 0 ; i--) {
+			var w = g[v][i];
+			if (!explored[w]) {
+				explored[w] = 1;
+				// For step 1
+				f[w] = count;
+				s.push(w);
+
+				count++;
+			}
+		}
+	}
+}
+
+function doTheMagic(input) {
+	var output = '';
+	var g = input;
+	var grev = reverseGraph(g);
+	var topLevelNodeId;
+
+	init(g);
+	output = grev.join(" ");
+
+	// Initialize inishing times.
+	f = [];
+
+	// Run DFS on grev to compute finishing times.
+	while ((topLevelNodeId = pickUnexploredNode(grev)) !== null) {
+		dfs(grev, topLevelNodeId);	
+	}
+
+	console.log("Finishing times");
+	console.table(f);
+
+	// Reset the explored list to use on g.
+	explored = [];
+	
+	// Run DFS on g, from the highest finishing times down, plucking SCCs as we go,
+	// until they're all gone.
+
+	return output;
+}
+
+(function run() {
+	examples.forEach(function(example, i) {		
+		var expected = example.output;
+		var found = doTheMagic(example.input);
+
+		if (expected === found) {
+			console.log("Success");
+			return;
+		}
+		console.log("Run number", i);
+		console.log("Expected:", expected);
+		console.log("Found:", found);
+	});
+})();
+</script>
+</body>
+</html>
