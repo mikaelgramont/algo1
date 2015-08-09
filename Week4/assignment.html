@@ -5,7 +5,8 @@
 </head>
 <body>
 
-<script src="examples.js"></script>
+<!-- <script src="examples.js"></script> -->
+<script src="out.js"></script>
 <script>
 var Stack = function() {
 	this.arr = [];
@@ -175,7 +176,7 @@ function doTheMagic(input) {
 		dfsLoopStep1(grev, w);	
 	}
 
-	console.log("Post step 1 - Finishing times", f);
+	// console.log("Post step 1 - Finishing times", f);
 
 	initExplored(g);
 	initLeaders(g);
@@ -187,14 +188,14 @@ function doTheMagic(input) {
 		dfsLoopStep2(g2, w, w);	
 	}
 
-	console.log("Post step 2 - leaders", leaders);
+	// console.log("Post step 2 - leaders", leaders);
 	totals = [];
 
 	initLeaderTotals(g);
 	leaders.forEach(function(leader) {
 		leaderTotals[leader]++;
 	});
-	console.log("Post step 2 - leaderTotals", leaderTotals);
+	// console.log("Post step 2 - leaderTotals", leaderTotals);
 
 	var sorted = leaderTotals.sort();
 	var output = sorted.reverse().splice(0, 5).join(',');
@@ -202,26 +203,29 @@ function doTheMagic(input) {
 	return output;
 }
 
-(function run() {
-	var error = false;
-	examples.splice(5,1).forEach(function(example, i) {
+// (function run() {
+// 	var error = false;
+// 	examples.forEach(function(example, i) {
 
-		if (error) {
-			return;
-		}
-		var expected = example.output;
-		var found = doTheMagic(example.input);
+// 		if (error) {
+// 			return;
+// 		}
+// 		var expected = example.output;
+// 		var found = doTheMagic(example.input);
 
-		console.log("Run number", i);
-		if (expected === found) {
-			console.log("Success");
-		} else {
-			console.log("Expected:", expected);
-			console.log("Found:", found);
-			error = true;
-		}
-	});
-})();
+// 		console.log("Run number", i);
+// 		if (expected === found) {
+// 			console.log("Success");
+// 		} else {
+// 			console.log("Expected:", expected);
+// 			console.log("Found:", found);
+// 			error = true;
+// 		}
+// 	});
+// })();
+
+var found = doTheMagic(scc);
+console.log("found", found);
 </script>
 </body>
 </html>

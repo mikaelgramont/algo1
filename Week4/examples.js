@@ -7,7 +7,7 @@ var examples = [{
 	input: [[1],[5,2,3],[0,3],[4],[3],[4,6],[5,7],[4,6]],
 	output: "3,3,2,0,0"
 }, {
-	// OK - problem with adj list generation
+	// OK
 	input: [[1],[2],[0,3],[],[3],[3,6],[7],[5]],
 	output: "3,3,1,1,0"
 }, {

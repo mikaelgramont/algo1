@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+set_time_limit(120);
+
 class Utils
 {
 	public static function getList($filename)
@@ -27,20 +30,16 @@ class Utils
 		for ($i = 0; $i <= $max; $i++) {
 			if (array_key_exists($i, $list)) {
 				$list2[$i] = $list[$i];
-				echo "Copying entry $i\n";
+				//echo "Copying entry $i\n";
 			} else {		
 				$list2[$i] = [];
-				echo "Creating entry $i\n";
+				//echo "Creating entry $i\n";
 			}
 		}
-
-		return json_encode($list2);
+		$data = json_encode($list2);
+		file_put_contents("out.js", $data);
 	}
 }
-?>
-<pre>
-<?php
 $id = isset($_GET['id']) ? $_GET['id'] : '1';
-echo Utils::getList("example".$id.".txt");
-?>
-</pre>
+// echo Utils::getList("example".$id.".txt");
+Utils::getList("SCC.txt");
