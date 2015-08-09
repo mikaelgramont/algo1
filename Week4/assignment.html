@@ -31,6 +31,7 @@ function initExplored(g) {
 
 var f;
 function initFinishingTimes() {
+	dfsStep1Count = 0;
 	f = [];	
 }
 
@@ -43,8 +44,14 @@ function initLeaders(g) {
 	}
 }
 
-var source;
-
+var initLeaderTotals;
+function initLeaderTotals(g) {
+	leaderTotals = [];
+	var l = g.length;
+	for (var i = 0; i < l; i++) {
+		leaderTotals[i] = 0;
+	}
+}
 
 function reverseGraph(g) {
 	var rev = [];
@@ -93,44 +100,45 @@ function dfsLoopStep1(g, startId) {
 	}
 }
 
+function replaceIds(g, f) {
+	var g2 = [];
+	var l = g.length;
+	for (var i = 0; i < l; i++) {
+		g2[i] = [];
+	}
 
-function dfsLoopStep1_(g, startId) {
-	var s = new Stack();
-
-	push(startId);
-
-	while(!s.isEmpty()) {
-		var v = pop();
-
-		g[v].forEach(function(w) {
-			if (!explored[w]) {
-				markExplored(w);
-				push(w);
+	// Replace object keys.
+	g.forEach(function(v, index) {
+		var v2 = [];
+		v.forEach(function(w) {
+			if (f[w] !== undefined) {
+				v2.push(f[w]);
 			}
 		});
 
-		markExplored(v);
-		f[v] = dfsStep1Count;
-		console.log("f[" + v + "] = " + dfsStep1Count);
-		dfsStep1Count++;
-	}
-	
-	function markExplored(w) {
-		explored[w] = 1;
-	}
+		g2[f[index]] = v2;
+	});
+	return g2;
+}
 
-	function push(v) {
-		s.push(v);
-		console.log(s.arr);
+function dfsLoopStep2(g, startId, leader) {
+	markExplored(startId, leader);
+	var v = g[startId];
+	var nbConnectedNodes = v.length;
+	for (var i = nbConnectedNodes - 1; i >= 0 ; i--) {
+		var w = v[i];
+		if (!explored[w]) {
+			markExplored(w, leader);
+			dfsLoopStep2(g, w, leader);
+		}
 	}
-	function pop() {
-		var v = s.pop();
-		console.log("Popped", v);
-		return v;
+	function markExplored(w, leader) {
+		leaders[w] = leader;
+		explored[w] = 1;
 	}
 }
 
-function dfsLoopStep2(g, startId) {
+function dfsLoopStep2_(g, startId) {
 	var s = new Stack();
 	s.push(startId);
 	markExplored(startId);
@@ -168,40 +176,50 @@ function doTheMagic(input) {
 	}
 
 	console.log("Post step 1 - Finishing times", f);
-	return;
+
 	initExplored(g);
 	initLeaders(g);
+	var g2 = replaceIds(g, f);
 
-	// Run dfsLoopStep2 on g, from the highest finishing times down, plucking SCCs as we go,
+	// Run dfsLoopStep2 on g2, from the highest finishing times down, plucking SCCs as we go,
 	// until they're all gone.
-	while ((topLevelNodeId = pickUnexploredNode(g)) !== null) {
-		source = topLevelNodeId;
-		dfsLoopStep2(g, topLevelNodeId);	
+	while ((w = pickUnexploredNode(g2)) !== null) {
+		dfsLoopStep2(g2, w, w);	
 	}
 
 	console.log("Post step 2 - leaders", leaders);
+	totals = [];
 
-	// Debug
-	output = grev.join(" ");
+	initLeaderTotals(g);
+	leaders.forEach(function(leader) {
+		leaderTotals[leader]++;
+	});
+	console.log("Post step 2 - leaderTotals", leaderTotals);
+
+	var sorted = leaderTotals.sort();
+	var output = sorted.reverse().splice(0, 5).join(',');
+
 	return output;
 }
 
 (function run() {
-	examples.forEach(function(example, i) {
-		if (i)	{
-			// Temp for debug
+	var error = false;
+	examples.splice(5,1).forEach(function(example, i) {
+
+		if (error) {
 			return;
 		}
 		var expected = example.output;
 		var found = doTheMagic(example.input);
 
+		console.log("Run number", i);
 		if (expected === found) {
 			console.log("Success");
-			return;
+		} else {
+			console.log("Expected:", expected);
+			console.log("Found:", found);
+			error = true;
 		}
-		console.log("Run number", i);
-		console.log("Expected:", expected);
-		console.log("Found:", found);
 	});
 })();
 </script>
