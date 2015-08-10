@@ -54,6 +54,8 @@ function initLeaderTotals(g) {
 	}
 }
 
+var visits = [];
+
 function reverseGraph(g) {
 	var rev = [];
 
@@ -85,7 +87,9 @@ function pickUnexploredNode(g) {
 
 var dfsStep1Count = 0;
 function dfsLoopStep1Recursive(g, startId) {
-	markExplored(startId);
+	if (!explored[startId]) {
+		markExplored(startId);
+	}
 	var nbConnectedNodes = g[startId].length;
 	for (var i = 0; i < nbConnectedNodes; i++) {
 		var w = g[startId][i];
@@ -98,26 +102,36 @@ function dfsLoopStep1Recursive(g, startId) {
 
 	function markExplored(w) {
 		explored[w] = 1;
+		visits.push(w);
 	}
 }
 
-function dfsLoopStep1Iterative(g, startId, leader) {
-	markExplored(startId, leader);
+function dfsLoopStep1Iterative(g, startId) {
+	if (!explored[startId]) {
+		markExplored(startId);
+	}
 	var s = new Stack();
 	s.push(startId);
-	markExplored(startId, leader);
 
 	var v;
 	while(!s.isEmpty()) {
 		v = s.pop();
 
-		for (var i = g[v].length - 1; i >= 0 ; i--) {
+		for (var i = 0; i < g[v].length; i++) {
 			var w = g[v][i];
 			if (!explored[w]) {
-				markExplored(w, leader);
+				markExplored(w);
 				s.push(w);
+				f[w] = dfsStep1Count++;
 			}			
 		}
+	}
+	f[startId] = dfsStep1Count++;
+
+	
+	function markExplored(w) {
+		explored[w] = 1;
+		visits.push(w);
 	}
 }
 
@@ -196,10 +210,12 @@ function doTheMagic(input) {
 	initFinishingTimes();
 
 	// Run DFS on grev to compute finishing times.
+	visits = [];
 	while ((w = pickUnexploredNode(grev)) !== null) {
-		dfsLoopStep1Recursive(grev, w);	
+		// dfsLoopStep1Recursive(grev, w);
+		dfsLoopStep1Iterative(grev, w);
 	}
-
+	// console.log("Visits", visits);
 	// console.log("Post step 1 - Finishing times", f);
 
 	initExplored(g);
@@ -220,9 +236,12 @@ function doTheMagic(input) {
 		leaderTotals[leader]++;
 	});
 	// console.log("Post step 2 - leaderTotals", leaderTotals);
+	function sortNumber(a, b) {
+	    return b - a;
+	}
 
-	var sorted = leaderTotals.sort();
-	var output = sorted.reverse().splice(0, 5).join(',');
+	var sorted = leaderTotals.sort(sortNumber);
+	var output = sorted.splice(0, 5).join(',');
 
 	return output;
 }
@@ -241,7 +260,7 @@ function doTheMagic(input) {
 	examples.forEach(function(example, i) {
 
 		if (error) {
-			return;
+			//return;
 		}
 		var expected = example.output;
 		var found = doTheMagic(example.input);
@@ -250,8 +269,8 @@ function doTheMagic(input) {
 		if (expected === found) {
 			console.log("Success");
 		} else {
-			console.log("Expected:", expected);
-			console.log("Found:", found);
+			console.error("Expected:", expected);
+			console.error("Found:", found);
 			error = true;
 		}
 	});
