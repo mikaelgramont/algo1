@@ -5,8 +5,8 @@
 </head>
 <body>
 
-<!-- <script src="examples.js"></script> -->
-<script src="out.js"></script>
+<script src="examples.js"></script>
+<!-- <script src="out.js"></script> -->
 <script>
 var Stack = function() {
 	this.arr = [];
@@ -84,14 +84,14 @@ function pickUnexploredNode(g) {
 }
 
 var dfsStep1Count = 0;
-function dfsLoopStep1(g, startId) {
+function dfsLoopStep1Recursive(g, startId) {
 	markExplored(startId);
 	var nbConnectedNodes = g[startId].length;
 	for (var i = 0; i < nbConnectedNodes; i++) {
 		var w = g[startId][i];
 		if (!explored[w]) {
 			markExplored(w);
-			dfsLoopStep1(g, w);
+			dfsLoopStep1Recursive(g, w);
 		}
 	}
 	f[startId] = dfsStep1Count++;
@@ -100,6 +100,27 @@ function dfsLoopStep1(g, startId) {
 		explored[w] = 1;
 	}
 }
+
+function dfsLoopStep1Iterative(g, startId, leader) {
+	markExplored(startId, leader);
+	var s = new Stack();
+	s.push(startId);
+	markExplored(startId, leader);
+
+	var v;
+	while(!s.isEmpty()) {
+		v = s.pop();
+
+		for (var i = g[v].length - 1; i >= 0 ; i--) {
+			var w = g[v][i];
+			if (!explored[w]) {
+				markExplored(w, leader);
+				s.push(w);
+			}			
+		}
+	}
+}
+
 
 function replaceIds(g, f) {
 	var g2 = [];
@@ -122,7 +143,7 @@ function replaceIds(g, f) {
 	return g2;
 }
 
-function dfsLoopStep2(g, startId, leader) {
+function dfsLoopStep2Recursive(g, startId, leader) {
 	markExplored(startId, leader);
 	var v = g[startId];
 	var nbConnectedNodes = v.length;
@@ -139,26 +160,29 @@ function dfsLoopStep2(g, startId, leader) {
 	}
 }
 
-function dfsLoopStep2_(g, startId) {
+function dfsLoopStep2Iterative(g, startId, leader) {
+	markExplored(startId, leader);
 	var s = new Stack();
 	s.push(startId);
-	markExplored(startId);
+	markExplored(startId, leader);
 
 	var v;
-	while((v = s.pop()) !== undefined) {
+	while(!s.isEmpty()) {
+		v = s.pop();
+
 		for (var i = g[v].length - 1; i >= 0 ; i--) {
 			var w = g[v][i];
 			if (!explored[w]) {
-				markExplored(w);
+				markExplored(w, leader);
 				s.push(w);
-			}
-			
+			}			
 		}
 	}
 
-	function markExplored(w) {
+	function markExplored(w, leader) {
 		explored[w] = 1;
-		leaders[w] = source;
+		leaders[w] = leader;
+		// visits.push(w);
 	}
 }
 
@@ -173,7 +197,7 @@ function doTheMagic(input) {
 
 	// Run DFS on grev to compute finishing times.
 	while ((w = pickUnexploredNode(grev)) !== null) {
-		dfsLoopStep1(grev, w);	
+		dfsLoopStep1Recursive(grev, w);	
 	}
 
 	// console.log("Post step 1 - Finishing times", f);
@@ -185,7 +209,7 @@ function doTheMagic(input) {
 	// Run dfsLoopStep2 on g2, from the highest finishing times down, plucking SCCs as we go,
 	// until they're all gone.
 	while ((w = pickUnexploredNode(g2)) !== null) {
-		dfsLoopStep2(g2, w, w);	
+		dfsLoopStep2Iterative(g2, w, w);	
 	}
 
 	// console.log("Post step 2 - leaders", leaders);
@@ -203,29 +227,38 @@ function doTheMagic(input) {
 	return output;
 }
 
-// (function run() {
-// 	var error = false;
-// 	examples.forEach(function(example, i) {
+// var visits = [];
+// var g = examples[6].input;
+// initExplored(g);
+// while ((w = pickUnexploredNode(g)) !== null) {
+// 	dfsLoopStep2_(g, 0);	
+// }
 
-// 		if (error) {
-// 			return;
-// 		}
-// 		var expected = example.output;
-// 		var found = doTheMagic(example.input);
 
-// 		console.log("Run number", i);
-// 		if (expected === found) {
-// 			console.log("Success");
-// 		} else {
-// 			console.log("Expected:", expected);
-// 			console.log("Found:", found);
-// 			error = true;
-// 		}
-// 	});
-// })();
 
-var found = doTheMagic(scc);
-console.log("found", found);
+(function run() {
+	var error = false;
+	examples.forEach(function(example, i) {
+
+		if (error) {
+			return;
+		}
+		var expected = example.output;
+		var found = doTheMagic(example.input);
+
+		console.log("Run number", i);
+		if (expected === found) {
+			console.log("Success");
+		} else {
+			console.log("Expected:", expected);
+			console.log("Found:", found);
+			error = true;
+		}
+	});
+})();
+
+// var found = doTheMagic(scc);
+// console.log("found", found);
 </script>
 </body>
 </html>
